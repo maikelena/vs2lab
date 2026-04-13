@@ -27,16 +27,18 @@ class Server:
             "Maike": "222",
             "Romy": "333"
         }
-        self._logger.info("Server bound to socket " + str(self.sock))
+        self._logger.info("Server connected to socket " + str(self.sock))
 
     def get(self, name):
+        """Return number for a given name or None."""
         return self.phonebook.get(name)
 
     def getAll(self):
+        """Return all phonebook entries."""
         return self.phonebook
     
-    def handler(self, request):
-        self._logger.info("Server received request: %s", request)
+    def handle(self, request):
+        self._logger.info("Server received request: " + request)
         if request.startswith("GET|"):
             name = request.split("|", 1)[1]
             number = self.get(name)
@@ -45,26 +47,33 @@ class Server:
             return f"OK|{name}|{number}"
 
         if request == "GETALL":
-            entries = [f"{name}={number}" for name, number in self.getall().items()]
+            entries = [f"{name}={number}" for name, number in self.getAll().items()]
             return "OKALL|" + ";".join(entries)
-
+        
         return "ERROR|BAD_REQUEST"
 
     def serve(self):
         """ Serve """
         self.sock.listen(1)
+        self._logger.info("Server listening on %s:%s", const_cs.HOST, const_cs.PORT)
+
         while self._serving:  # as long as _serving (checked after connections or socket timeouts)
             try:
                 # pylint: disable=unused-variable
                 (connection, address) = self.sock.accept()  # returns new socket and address of client
                 while True:  # forever
                     data = connection.recv(1024)  # receive data from client
+
                     if not data:
+                        self._logger.info("Client closed connection")
                         break  # stop if client stopped
+
                     request = data.decode("ascii")
-                    response = self.handler(request)
+                    self._logger.info("Received request: %s", request)
+                    response = self.handle(request)
                     connection.send(response.encode("ascii"))
-                    self._logger.info("Server sent response: %s", response)
+                    self._logger.info("Server sent response: " + response)
+
                 connection.close()  # close the connection
 
             except socket.timeout:
@@ -84,11 +93,10 @@ class Client:
 
     def call(self, request):
         """ Call server """
+        self.logger.info("Sending request: " + request)
         self.sock.send(request.encode('ascii'))  # send encoded string as data
         data = self.sock.recv(1024)  # receive the response
         response = data.decode('ascii')
-        self.sock.close()
-        self.logger.info("Client down.")
         return response
     
     def get(self, name):
