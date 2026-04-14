@@ -1,5 +1,7 @@
 import rpc
 import logging
+import threading
+import time
 
 from context import lab_logging
 
@@ -9,8 +11,19 @@ cl = rpc.Client()
 cl.run()
 
 base_list = rpc.DBList({'foo'})
-result_list = cl.append('bar', base_list)
+done = threading.Event()
 
-print("Result: {}".format(result_list.value))
+
+def on_result(result_list):
+    print("Result: {}".format(result_list.value))
+    done.set()
+
+
+cl.append_async('bar', base_list, on_result)
+
+# Show that the client stays active while waiting for the server result.
+while not done.is_set():
+    print("Client is active while waiting...")
+    time.sleep(1)
 
 cl.stop()
