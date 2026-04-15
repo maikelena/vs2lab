@@ -13,15 +13,15 @@ cl.run()
 base_list = rpc.DBList({'foo'})
 done = threading.Event()
 
-
+#Callback 
 def on_result(result_list):
     print("Result: {}".format(result_list.value))
     done.set()
 
-
+# Starts call
 cl.append_async('bar', base_list, on_result)
 
-# Show that the client stays active while waiting for the server result.
+# Shows that active
 while not done.is_set():
     print("Client is active while waiting...")
     time.sleep(1)

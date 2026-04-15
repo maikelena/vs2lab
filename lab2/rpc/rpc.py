@@ -53,7 +53,7 @@ class Client:
             req_id = payload[1]
 
             if msg_type == constRPC.ACK:
-                # ACK received; client can continue doing other work.
+                #Can continue doing other work.
                 continue
 
             if msg_type == constRPC.RESULT and len(payload) >= 3:
@@ -72,22 +72,6 @@ class Client:
         msglst = (constRPC.APPEND, req_id, data, db_list)  # message payload
         self.chan.send_to(self.server, msglst)  # send msg to server
         return req_id
-
-    def append(self, data, db_list):
-        """
-        Backwards-compatible sync wrapper around the async RPC.
-        """
-        done = threading.Event()
-        holder = {}
-
-        def _cb(result):
-            holder['result'] = result
-            done.set()
-
-        self.append_async(data, db_list, _cb)
-        done.wait()
-        return holder['result']
-
 
 class Server:
     def __init__(self):
