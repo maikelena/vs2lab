@@ -31,7 +31,8 @@ class Client:
         self.chan.bind(self.client)
         self.server = self.chan.subgroup('server')
         self._running.set()
-        self._listener_thread = threading.Thread(target=self._listen, daemon=True)
+        self._listener_thread = threading.Thread(
+            target=self._listen, daemon=True)
         self._listener_thread.start()
 
     def stop(self):
@@ -53,7 +54,7 @@ class Client:
             req_id = payload[1]
 
             if msg_type == constRPC.ACK:
-                #Can continue doing other work.
+                # Can continue doing other work.
                 continue
 
             if msg_type == constRPC.RESULT and len(payload) >= 3:
@@ -103,11 +104,13 @@ class Server:
     def run(self):
         self.chan.bind(self.server)
         while True:
-            msgreq = self.chan.receive_from_any(self.timeout)  # wait for any request
+            msgreq = self.chan.receive_from_any(
+                self.timeout)  # wait for any request
             if msgreq is not None:
                 client = msgreq[0]  # see who is the caller
                 msgrpc = msgreq[1]  # fetch call & parameters
-                if constRPC.APPEND == msgrpc[0]:  # check what is being requested
+                # check what is being requested
+                if constRPC.APPEND == msgrpc[0]:
                     req_id = msgrpc[1]
                     data = msgrpc[2]
                     db_list = msgrpc[3]
@@ -120,6 +123,7 @@ class Server:
 
                     # Then send result
                     result = self.append(data, db_list)  # do local call
-                    self.chan.send_to({client}, (constRPC.RESULT, req_id, result))
+                    self.chan.send_to(
+                        {client}, (constRPC.RESULT, req_id, result))
                 else:
                     pass  # unsupported request, simply ignore
