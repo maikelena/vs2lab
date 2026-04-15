@@ -8,9 +8,11 @@ import socket
 import const_cs
 from context import lab_logging
 
-lab_logging.setup(stream_level=logging.INFO)  # init loging channels for the lab
+# init loging channels for the lab
+lab_logging.setup(stream_level=logging.INFO)
 
 # pylint: disable=logging-not-lazy, line-too-long
+
 
 class Server:
     """ The server """
@@ -19,7 +21,8 @@ class Server:
 
     def __init__(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  # prevents errors due to "addresses in use"
+        # prevents errors due to "addresses in use"
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sock.bind((const_cs.HOST, const_cs.PORT))
         self.sock.settimeout(3)  # time out in order not to block forever
         self._logger.info("Server bound to socket " + str(self.sock))
@@ -45,7 +48,8 @@ class Server:
         request = request.strip()
 
         if request == "GETALL":
-            entries = [f"{name}:{number}" for name, number in self.getall().items()]
+            entries = [f"{name}:{number}" for name,
+                       number in self.getall().items()]
             return "OKALL|" + ";".join(entries)
 
         parts = request.split("|")
@@ -60,16 +64,18 @@ class Server:
 
         return "ERROR|BAD_REQUEST"
 
-
     def serve(self):
         """ Serve echo """
         self.sock.listen(1)
-        self._logger.info("Server listening on %s:%s", const_cs.HOST, const_cs.PORT)
+        self._logger.info("Server listening on %s:%s",
+                          const_cs.HOST, const_cs.PORT)
 
-        while self._serving:  # as long as _serving (checked after connections or socket timeouts)
+        # as long as _serving (checked after connections or socket timeouts)
+        while self._serving:
             try:
                 # pylint: disable=unused-variable
-                (connection, address) = self.sock.accept() # returns new socket and address of client
+                # returns new socket and address of client
+                (connection, address) = self.sock.accept()
                 self._logger.info("Accepted connection from %s", address)
 
                 while True:  # forever
@@ -91,11 +97,10 @@ class Server:
                 pass  # ignore timeouts
         self.sock.close()
         self._logger.info("Server down.")
-        
+
     def stop(self):
         """Stop server loop."""
-        self._serving = False 
-
+        self._serving = False
 
 
 class Client:
@@ -115,7 +120,7 @@ class Client:
         response = data.decode("utf-8")
         self.logger.info("Received response: %s", response)
         return response
-    
+
     def get(self, name):
         """Request one entry by name."""
         return self._send_request(f"GET|{name}")
@@ -124,7 +129,7 @@ class Client:
         """Request all entries."""
         return self._send_request("GETALL")
 
-    #def call(self, msg_in="Hello, world"):
+    def call(self, msg_in="Hello, world"):
         """ Call server """
         self.sock.send(msg_in.encode('ascii'))  # send encoded string as data
         data = self.sock.recv(1024)  # receive the response
