@@ -126,11 +126,44 @@ cd ~/git/vs2lab/lab3/zmq2 # angenommen hier liegt das vs2lab Repo
 2. Terminal2: `pipenv run python client.py`
 3. Terminal3: `pipenv run python client.py`
 
+1. Terminal1: -
+
+2. Terminal2: `pipenv run python client.py`
+b'TIME 14:45:29.475809'
+b'TIME 14:45:34.489311'
+b'TIME 14:45:39.489882'
+b'TIME 14:45:42.438560'
+b'TIME 14:45:47.455641'
+
+3. Terminal3: `pipenv run python client.py`
+b'TIME 14:45:42.438560'
+b'TIME 14:45:47.455641'
+b'TIME 14:45:52.458419'
+b'TIME 14:45:57.462452'
+b'TIME 14:46:02.466176'
+
+Erklärung: Jeder Client sieht nur Nachrichten ab dem Zeitpunkt, an dem er verbunden ist und sein Subscribe aktiv ist. Deshalb sieht Terminal3 erst spätere Nachrichten, obwohl der Server von Anfang an sendet (keine Nachlieferung alter Messages).
+
 #### Experiment 2
 
 1. Terminal1: `pipenv run python server.py`
 2. Terminal2: `pipenv run python client.py`
 3. Terminal3: `pipenv run python client1.py`
+
+1. Terminal1: `pipenv run python server.py`
+-
+2. Terminal2: `pipenv run python client.py`
+b'TIME 14:47:17.893259'
+b'TIME 14:47:22.894005'
+b'TIME 14:47:27.901577'
+b'TIME 14:47:32.920286'
+b'TIME 14:47:35.860837'
+3. Terminal3: `pipenv run python client1.py`
+b'DATE 2026-04-20'
+b'DATE 2026-04-20'
+b'DATE 2026-04-20'
+
+Erklärung: Clients filtern nach Topics: client abonniert offenbar TIME und client1 DATE. Daher bekommt Terminal2 nur TIME ... und Terminal3 nur DATE, obwohl beide vom selben Publisher kommen. 
 
 **Aufgabe Lab3.2:** Erklären Sie das Verhalten der Systeme in den beiden
 Experimenten.
@@ -161,15 +194,77 @@ Gehen sie nun wie folgt vor:
 
 #### Experiment1
 
+Grundsätzlich: Farmer(tasksrc.py) erzeugen Tasks und schicken sie per Push. Worker(taskwork.py) holen sie per Pull, Tasks per round-robin auf verfügbaren Worker.
+
 1. Terminal1: `pipenv run python tasksrc.py 1`
 2. Terminal2: `pipenv run python tasksrc.py 2`
 3. Terminal3: `pipenv run python taskwork.py 1`
+
+1. Terminal1: `pipenv run python tasksrc.py 1`
+-
+2. Terminal2: `pipenv run python tasksrc.py 2`
+-
+3. Terminal3: `pipenv run python taskwork.py 1`
+1 started
+1 received workload 2 from 1
+1 received workload 6 from 2
+1 received workload 58 from 1
+1 received workload 79 from 2
+1 received workload 39 from 1
+1 received workload 65 from 2
+...
+1 received workload 26 from 1
+1 received workload 15 from 2
+1 received workload 24 from 1
+1 received workload 85 from 2
+1 received workload 57 from 1
+1 received workload 90 from 2
+1 received workload 70 from 1
+1 received workload 45 from 2
+
+Erklärung: Ein Worker bekommt Tasks abwechselnd von Farmer 1 und 2 (100 je Farmer, 1 Worker muss alle abarbeiten) -> langsam
 
 #### Experiment 2
 
 1. Terminal1: `pipenv run python taskwork.py 1`
 2. Terminal2: `pipenv run python taskwork.py 2`
 3. Terminal3: `pipenv run python tasksrc.py 1`
+
+1. Terminal1: `pipenv run python taskwork.py 1`
+1 started
+1 received workload 16 from 1
+1 received workload 25 from 1
+1 received workload 1 from 1
+1 received workload 54 from 1
+1 received workload 68 from 1
+1 received workload 11 from 1
+1 received workload 41 from 1
+1 received workload 12 from 1
+...
+1 received workload 65 from 1
+1 received workload 19 from 1
+1 received workload 83 from 1
+1 received workload 6 from 1
+1 received workload 47 from 1
+2. Terminal2: `pipenv run python taskwork.py 2`
+2 started
+2 received workload 18 from 1
+2 received workload 64 from 1
+2 received workload 66 from 1
+2 received workload 3 from 1
+2 received workload 28 from 1
+2 received workload 95 from 1
+...
+2 received workload 6 from 1
+2 received workload 70 from 1
+2 received workload 49 from 1
+2 received workload 89 from 1
+2 received workload 69 from 1
+2 received workload 59 from 1
+3. Terminal3: `pipenv run python tasksrc.py 1`
+-
+
+Erklärung: Tasks auf Worker 1 und Worker 2 verteilt, jeder sieht nur ein Teil der Tasks. (100 Tasks werde auf 2 Worker verteilt also jeweils 50) schneller da mehr Parallelität, weniger Tasks je Worker.  
 
 **Aufgabe Lab3.3:** Erklären Sie das Verhalten der Systeme in den beiden
 Experimenten.
