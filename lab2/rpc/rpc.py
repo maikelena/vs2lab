@@ -74,21 +74,6 @@ class Client:
         self.chan.send_to(self.server, msglst)  # send msg to server
         return req_id
 
-    # def append(self, data, db_list):
-    #     """
-    #     Backwards-compatible sync wrapper around the async RPC.
-    #     """
-    #     done = threading.Event()
-    #     holder = {}
-    #
-    #     def _cb(result):
-    #         holder['result'] = result
-    #         done.set()
-    #
-    #     self.append_async(data, db_list, _cb)
-    #     done.wait()
-    #     return holder['result']
-
 
 class Server:
     def __init__(self):
