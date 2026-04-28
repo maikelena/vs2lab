@@ -11,7 +11,7 @@ _TOKEN_RE = re.compile(r"[a-z0-9']+")
 
 
 def _partition(word: str) -> int:
-    # Simple deterministic partition: same word length => same reducer.
+    # same word length => same reducer.
     return len(word) % 2
 
 def _normalize_and_split(sentence: str) -> list[str]:

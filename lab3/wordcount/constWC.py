@@ -1,19 +1,15 @@
 import os
 
-# Minimal constants for Lab3 wordcount pipeline.
-#
-# Bind on "*" for container friendliness; clients connect via HOST.
-
 END_TOKEN = b"__END__"
 
 NUM_MAPPERS = 3
 
 HOST = os.environ.get("WC_HOST", "127.0.0.1")
 
-# Splitter PUSHes sentences to mappers (mappers PULL).
+# Splitter PUSHes sentences to mappers.
 SPLITTER_PORT = os.environ.get("WC_SPLITTER_PORT", "5557")
 
-# Reducers PULL words from mappers (mappers PUSH).
+# Reducers PULL words from mappers. 
 REDUCER0_PORT = os.environ.get("WC_REDUCER0_PORT", "5558")
 REDUCER1_PORT = os.environ.get("WC_REDUCER1_PORT", "5559")
 

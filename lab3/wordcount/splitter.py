@@ -40,7 +40,7 @@ def main() -> int:
         sentence = random.choice(SENTENCE_POOL)
         push.send_string(sentence)
 
-    # Send exactly one END per mapper to ensure each mapper receives a stop signal.
+    # Each mapper receives a stop signal.
     for _ in range(constWC.NUM_MAPPERS):
         push.send(constWC.END_TOKEN)
 
