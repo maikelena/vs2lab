@@ -35,7 +35,7 @@ def main() -> int:
         if not word:
             continue
         counts[word] = counts.get(word, 0) + 1
-        print(f"{word} {counts[word]}", flush=True)
+        print(f"{word} {counts[word]}", flush=True) #True to print immediately
 
     pull.close(linger=0)
     context.term()

@@ -38,9 +38,9 @@ def main() -> int:
 
     for _ in range(80):
         sentence = random.choice(SENTENCE_POOL)
-        push.send_string(sentence)
+        push.send_string(sentence) #to Socket, ZeroMQ sends the sentence to the mapper
 
-    # Each mapper receives a stop signal.
+    # Each mapper -> stop signal.
     for _ in range(constWC.NUM_MAPPERS):
         push.send(constWC.END_TOKEN)
 

@@ -7,11 +7,11 @@ import zmq
 import constWC
 
 
-_TOKEN_RE = re.compile(r"[a-z0-9']+")
+_TOKEN_RE = re.compile(r"[a-z0-9']+") #regex for words
 
 
 def _partition(word: str) -> int:
-    # same word length => same reducer.
+    # same word length => same reducer. 0 or 1
     return len(word) % 2
 
 def _normalize_and_split(sentence: str) -> list[str]:
@@ -24,11 +24,12 @@ def main() -> int:
     mapper_id = sys.argv[1] if len(sys.argv) > 1 else "?"
     print(f"mapper {mapper_id} started", flush=True)
 
+
     pull = context.socket(zmq.PULL)
-    pull.connect(constWC.splitter_connect_addr())
+    pull.connect(constWC.splitter_connect_addr()) #receive from splitter
 
     push_r0 = context.socket(zmq.PUSH)
-    push_r0.connect(constWC.reducer_connect_addr(0))
+    push_r0.connect(constWC.reducer_connect_addr(0)) #send to reducer 0
 
     push_r1 = context.socket(zmq.PUSH)
     push_r1.connect(constWC.reducer_connect_addr(1))
@@ -39,7 +40,7 @@ def main() -> int:
     time.sleep(0.2)
 
     while True:
-        msg = pull.recv()
+        msg = pull.recv() #wait for splitter
         if msg == constWC.END_TOKEN:
             # Signal both reducers that this mapper is done.
             push_r0.send(constWC.END_TOKEN)
