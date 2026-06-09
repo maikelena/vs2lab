@@ -2,6 +2,13 @@
 ENTER = 'ENTER'
 ALLOW = 'ALLOW'
 RELEASE = 'RELEASE'
+HEARTBEAT = 'HEARTBEAT'
+
+# Failure detection timings in seconds
+HEARTBEAT_INTERVAL = 1.0
+FAILURE_TIMEOUT = 6.0
+RECEIVE_TIMEOUT = 1
+
 # Process behaviors
 ACTIVE = 'ACTIVE'
 PASSIVE = 'PASSIVE'
