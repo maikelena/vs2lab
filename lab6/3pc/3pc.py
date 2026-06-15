@@ -1,7 +1,5 @@
 """
 Application performing a distributed commit using 3PC
-- sets up a group of participants and one coordinator
-- nodes run in separate processes (works on unix and windows)
 """
 
 import multiprocessing as mp

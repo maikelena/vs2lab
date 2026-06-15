@@ -11,15 +11,11 @@ from const3PC import TIMEOUT
 
 
 class Coordinator:
-    """
-    Minimal centralized Three-Phase Commit (3PC) coordinator.
-    Implements only the basic protocol flow (no termination protocols).
-    """
 
     def __init__(self, chan):
         self.channel = chan
         self.coordinator = self.channel.join('coordinator')
-        self.participants = set()
+        self.participants = []
         self.stable_log = stablelog.create_log("coordinator-" + self.coordinator)
         self.logger = logging.getLogger("vs2lab.lab6.3pc.Coordinator")
         self.state = None

@@ -14,17 +14,13 @@ import stablelog
 
 
 class Participant:
-    """
-    Minimal centralized Three-Phase Commit (3PC) participant.
-    Implements only the basic protocol flow (no termination protocols).
-    """
 
     def __init__(self, chan):
         self.channel = chan
         self.participant = self.channel.join('participant')
         self.stable_log = stablelog.create_log("participant-" + self.participant)
         self.logger = logging.getLogger("vs2lab.lab6.3pc.Participant")
-        self.coordinator = set()
+        self.coordinator = {}
         self.state = 'NEW'
 
     @staticmethod
