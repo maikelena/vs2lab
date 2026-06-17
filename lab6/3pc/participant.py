@@ -21,6 +21,7 @@ class Participant:
         self.stable_log = stablelog.create_log("participant-" + self.participant)
         self.logger = logging.getLogger("vs2lab.lab6.3pc.Participant")
         self.coordinator = {}
+        self.all_participants = {}
         self.state = 'NEW'
 
     @staticmethod
@@ -37,7 +38,43 @@ class Participant:
     def init(self):
         self.channel.bind(self.participant)
         self.coordinator = self.channel.subgroup('coordinator')
+        self.all_participants = self.channel.subgroup('participant')
         self._enter_state('INIT')
+
+    def _new_coordinator_id(self):
+        return min(self.all_participants, key=int)
+
+    def _terminate_after_coordinator_crash(self):
+        p_k = self._new_coordinator_id()
+
+        if self.participant == p_k:
+            if self.state == 'READY':
+                self._enter_state('ABORT')
+                self.channel.send_to(self.all_participants, GLOBAL_ABORT)
+                return GLOBAL_ABORT
+            if self.state == 'PRECOMMIT':
+                self._enter_state('COMMIT')
+                self.channel.send_to(self.all_participants, GLOBAL_COMMIT)
+                return GLOBAL_COMMIT
+            if self.state == 'COMMIT':
+                self.channel.send_to(self.all_participants, GLOBAL_COMMIT)
+                return GLOBAL_COMMIT
+            if self.state == 'ABORT':
+                self.channel.send_to(self.all_participants, GLOBAL_ABORT)
+                return GLOBAL_ABORT
+            return GLOBAL_ABORT
+
+        msg = self.channel.receive_from({p_k}, TIMEOUT)
+        if not msg:
+            self._enter_state('ABORT')
+            return GLOBAL_ABORT
+
+        decision = msg[1]
+        if decision == GLOBAL_COMMIT:
+            self._enter_state('COMMIT')
+        else:
+            self._enter_state('ABORT')
+        return decision
 
     def run(self):
         # Phase 1b: wait for vote request
@@ -66,9 +103,9 @@ class Participant:
         # Phase 2b: wait for PREPARE_COMMIT or GLOBAL_ABORT
         msg = self.channel.receive_from(self.coordinator, TIMEOUT)
         if not msg:
-            self._enter_state('ABORT')
-            return "Participant {} terminated in state ABORT due to timeout.".format(
-                self.participant
+            self._terminate_after_coordinator_crash()
+            return "Participant {} terminated in state {} due to coordinator crash (P_k={}).".format(
+                self.participant, self.state, self._new_coordinator_id()
             )
 
         if msg[1] == GLOBAL_ABORT:
@@ -84,9 +121,9 @@ class Participant:
         # Phase 3b: wait for GLOBAL_COMMIT
         msg = self.channel.receive_from(self.coordinator, TIMEOUT)
         if not msg:
-            self._enter_state('ABORT')
-            return "Participant {} terminated in state ABORT due to timeout.".format(
-                self.participant
+            self._terminate_after_coordinator_crash()
+            return "Participant {} terminated in state {} due to coordinator crash (P_k={}).".format(
+                self.participant, self.state, self._new_coordinator_id()
             )
 
         if msg[1] == GLOBAL_COMMIT:

@@ -1,3 +1,4 @@
+import random
 import logging
 
 import stablelog
@@ -36,6 +37,9 @@ class Coordinator:
         self._enter_state('WAIT')
         self.channel.send_to(self.participants, VOTE_REQUEST)
 
+        if random.random() > 2/3:
+            return "Coordinator crashed in state WAIT."
+
         # Phase 2a: collect votes
         yet_to_receive = set(self.participants)
         while len(yet_to_receive) > 0:
@@ -54,6 +58,9 @@ class Coordinator:
         # Phase 2a -> PRECOMMIT
         self._enter_state('PRECOMMIT')
         self.channel.send_to(self.participants, PREPARE_COMMIT)
+
+        if random.random() > 2/3:
+            return "Coordinator crashed in state PRECOMMIT."
 
         # Phase 3a: collect READY_COMMIT
         yet_to_receive = set(self.participants)
