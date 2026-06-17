@@ -132,7 +132,6 @@ class Participant:
                 self.participant
             )
 
-        # Any other message => abort (minimal, no recovery/termination logic)
         self._enter_state('ABORT')
         return "Participant {} terminated in state ABORT due to unexpected message {}.".format(
             self.participant, msg[1]
